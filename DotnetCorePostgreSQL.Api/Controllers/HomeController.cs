@@ -14,25 +14,25 @@ namespace DotnetCorePostgreSQL.Api.Controllers
     public class HomeController : ControllerBase
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ISampleService _sampleService;
+        private readonly IPostService _postService;
 
-        public HomeController(ILogger<HomeController> logger, ISampleService sampleService)
+        public HomeController(ILogger<HomeController> logger, IPostService postService)
         {
             _logger = logger;
-            _sampleService = sampleService;
+            _postService = postService;
         }
 
         [HttpGet("insertdata")]
         public async Task<IActionResult> InsertDataToDatabase()
         {
-            var posts = await _sampleService.GetJsonDatasFromRemoteServer();
+            var posts = await _postService.GetJsonDatasFromRemoteServer();
 
             if (posts == null)
             {
                 return BadRequest("Error while receiving posts");
             }
 
-            var saveResult = _sampleService.InsertDataToDatabase(posts);
+            var saveResult = _postService.InsertDataToDatabase(posts);
 
             if (!saveResult.Result)
             {
@@ -40,6 +40,27 @@ namespace DotnetCorePostgreSQL.Api.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpGet("getdata")]
+        public async Task<IActionResult> GetDataFromPost()
+        {
+            var posts = await _postService.GetData();
+
+            if (posts == null)
+            {
+                return BadRequest("Error while receiving posts");
+            }
+
+            return Ok(posts);
+        }
+
+        [HttpGet("getcount")]
+        public async Task<IActionResult> GetPostTableCount()
+        {
+            var dataCount = await _postService.GetCount();
+
+            return Ok(dataCount);
         }
     }
 }

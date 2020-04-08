@@ -1,5 +1,8 @@
-﻿using DotnetCorePostgreSQL.Api.Data;
+﻿using AutoMapper;
+using DotnetCorePostgreSQL.Api.Data;
+using DotnetCorePostgreSQL.Api.Data.DTO;
 using DotnetCorePostgreSQL.Api.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,17 +12,19 @@ using System.Threading.Tasks;
 
 namespace DotnetCorePostgreSQL.Api.Services
 {
-    public class SampleService : ISampleService
+    public class PostService : IPostService
     {
-        private readonly IHttpClientFactory _clientFactory;
         private readonly AppDbContext _appDbContext;
+        private readonly IHttpClientFactory _clientFactory;
+        private readonly IMapper _mapper;
 
         public List<Post> Posts { get; set; }
 
-        public SampleService(AppDbContext appDbContext, IHttpClientFactory clientFactory)
+        public PostService(AppDbContext appDbContext, IHttpClientFactory clientFactory, IMapper mapper)
         {
             _appDbContext = appDbContext;
             _clientFactory = clientFactory;
+            _mapper = mapper;
         }
 
         public async Task<List<Post>> GetJsonDatasFromRemoteServer()
@@ -46,6 +51,18 @@ namespace DotnetCorePostgreSQL.Api.Services
             var saveResult = await _appDbContext.SaveChangesAsync();
 
             return saveResult > 0;
+        }
+
+        public async Task<List<PostDto>> GetData()
+        {
+            List<Post> allPost = await _appDbContext.Post.ToListAsync();
+
+            return _mapper.Map<List<Post>, List<PostDto>>(allPost);
+        }
+
+        public async Task<int> GetCount()
+        {
+            return await _appDbContext.Post.CountAsync();
         }
     }
 }

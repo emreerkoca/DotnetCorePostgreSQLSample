@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using DotnetCorePostgreSQL.Api.Data;
 using DotnetCorePostgreSQL.Api.Services;
 using Microsoft.AspNetCore.Builder;
@@ -22,20 +23,25 @@ namespace DotnetCorePostgreSQL.Api
         {
             Configuration = configuration;
         }
-        
+
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            //services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("PostgreSQLConnection")));
 
             services.AddHttpClient();
+            services.AddAutoMapper(typeof(Startup));
 
-            services.AddScoped<ISampleService, SampleService>();
+
+
+            services.AddScoped<IPostService, PostService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
